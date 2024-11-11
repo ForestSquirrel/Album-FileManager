@@ -1,0 +1,100 @@
+<mat-sidenav-container class="sidenav-container">
+  <mat-sidenav
+    #drawer
+    class="sidenav"
+    fixedInViewport
+    [attr.role]="(isHandset$ | async) ? 'dialog' : 'navigation'"
+    [mode]="(isHandset$ | async) ? 'over' : 'side'"
+    [opened]="(isHandset$ | async) === false"
+  >
+  <mat-toolbar>Folders</mat-toolbar>
+    <app-folder-tree
+      (folderSelected)="updatePhotos($event.name)"
+      (photoMoved)="onPhotoMoved($event)"
+    ></app-folder-tree>
+  </mat-sidenav>
+
+  <mat-sidenav-content>
+    <div class="content-container">
+      <!-- Toolbar -->
+      <mat-toolbar color="primary">
+        <!-- Toolbar content -->
+        <button
+          type="button"
+          aria-label="Toggle sidenav"
+          mat-icon-button
+          (click)="drawer.toggle()"
+        >
+          <mat-icon aria-label="Side nav toggle icon">menu</mat-icon>
+        </button>
+        <span>Photo Gallery</span>
+        <span class="spacer"></span>
+        <!-- Theme Switcher Icon -->
+        <button mat-icon-button [matMenuTriggerFor]="themeMenu">
+          <mat-icon>palette</mat-icon>
+        </button>
+        <!-- Theme Menu -->
+        <mat-menu #themeMenu="matMenu">
+          <button mat-menu-item (click)="changeTheme('theme-indigo-pink')">Indigo Pink</button>
+          <button mat-menu-item (click)="changeTheme('theme-deeppurple-amber')">Deep Purple Amber</button>
+          <button mat-menu-item (click)="changeTheme('theme-pink-bluegray')">Pink Bluegray</button>
+          <button mat-menu-item (click)="changeTheme('theme-purple-green')">Purple Green</button>
+        </mat-menu>
+        <!-- Account Menu -->
+        <ng-container *ngIf="!isLoggedIn; else loggedInMenu">
+          <!-- If not logged in, show Login and Register buttons -->
+          <button mat-button routerLink="/login">Login</button>
+          <button mat-button routerLink="/register">Register</button>
+        </ng-container>
+        <ng-template #loggedInMenu>
+          <!-- If logged in, show account menu -->
+          <button mat-icon-button [matMenuTriggerFor]="accMenu">
+            <mat-icon>account_circle</mat-icon>
+          </button>
+          <mat-menu #accMenu="matMenu">
+            <button mat-menu-item disabled>
+              <mat-icon>person</mat-icon>
+              {{ currentUser }}
+            </button>
+            <button mat-menu-item (click)="logout()">
+              <mat-icon>logout</mat-icon>
+              Log out
+            </button>
+            <!-- Additional account options can go here -->
+          </mat-menu>
+        </ng-template>
+      </mat-toolbar>
+      <!-- Main content area -->
+      <div class="main-content">
+        <ng-container *ngIf="isLoggedIn; else loginPrompt">
+          <app-photo-grid [photos]="photosToDisplay"></app-photo-grid>
+        </ng-container>
+        <ng-template #loginPrompt>
+          <div class="login-container">
+            <mat-card class="login-card">
+              <mat-card-header>
+                <mat-card-title>
+                  <h1>Welcome!</h1>
+                </mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <p class="login-text">
+                  Please 
+                  <a routerLink="/login" class="login-link">
+                    <mat-icon>login</mat-icon> login
+                  </a> 
+                  or 
+                  <a routerLink="/register" class="register-link">
+                    <mat-icon>person_add</mat-icon> register
+                  </a> 
+                  to view your photos.
+                </p>
+              </mat-card-content>
+            </mat-card>
+          </div>
+        </ng-template>
+        
+      </div>
+    </div>
+  </mat-sidenav-content>
+</mat-sidenav-container>

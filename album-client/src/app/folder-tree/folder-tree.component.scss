@@ -1,0 +1,53 @@
+.folder-tree {
+  padding: 10px;
+
+  .mat-tree-node {
+    display: flex;
+    align-items: center;
+
+    mat-icon {
+      margin-right: 8px;
+    }
+
+    &.selected {
+      background-color: rgba(185, 24, 24, 0.1); /* Adjust color as needed */
+      border-radius: 4px;
+    }
+
+    &.cdk-drop-list-dragging {
+      border-radius: 4px;
+      border-style: dotted;
+      animation: animateBorder 1.5s linear infinite; /* Add animation */
+    }
+  }
+
+  .example-tree-invisible {
+    display: none;
+  }
+}
+
+.tree-buttons {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Center the buttons horizontally */
+  margin-top: 20px;
+  padding: 0 10px; /* Add padding to the left and right */
+
+  button {
+    margin-bottom: 10px; /* Add gap between buttons */
+    width: 100%; /* Stretch buttons to full width of the container */
+    max-width: 200px; /* Optional: Set a maximum width */
+  }
+}
+
+@keyframes animateBorder {
+  0% {
+    border-color: rgba(185, 24, 24, 0.5); /* Starting border color */
+  }
+  50% {
+    border-color: rgba(185, 24, 24, 1); /* Midway border color */
+  }
+  100% {
+    border-color: rgba(185, 24, 24, 0.5); /* Ending border color */
+  }
+}

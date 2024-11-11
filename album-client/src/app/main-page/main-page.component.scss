@@ -1,0 +1,75 @@
+.sidenav {
+  width: 200px;
+}
+
+.sidenav .mat-toolbar {
+  background: inherit;
+}
+
+.mat-toolbar.mat-primary {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+.sidenav-container {
+  height: 100vh; /* Make the container fill the viewport height */
+}
+
+.mat-sidenav-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.content-container {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0; /* Allows the content to shrink when necessary */
+}
+
+.main-content {
+  flex: 1;
+  overflow: hidden; /* Prevents scrollbars from appearing */
+}
+
+// src/styles.scss or component-specific SCSS
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh; // Full viewport height for centering
+  background-color: #f5f5f5; // Light background
+}
+
+.login-card {
+  width: 400px; // Card width
+  padding: 20px;
+  text-align: center;
+}
+
+.login-text {
+  font-size: 1.2rem;
+  color: #333;
+}
+
+.login-link, .register-link {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  margin: 0 5px;
+  color: #007bff; // Custom color for links
+  font-weight: bold;
+
+  &:hover {
+    color: #0056b3; // Darker shade on hover
+  }
+
+  mat-icon {
+    margin-right: 5px; // Space between icon and text
+  }
+}
