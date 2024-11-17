@@ -79,17 +79,25 @@
               </mat-card-header>
               <mat-card-content>
                 <p class="login-text">
-                  Please 
+                  Please
                   <a routerLink="/login" class="login-link">
-                    <mat-icon>login</mat-icon> login
-                  </a> 
-                  or 
+                    <mat-icon>login</mat-icon> Login
+                  </a>
+                  or
                   <a routerLink="/register" class="register-link">
-                    <mat-icon>person_add</mat-icon> register
-                  </a> 
+                    <mat-icon>person_add</mat-icon> Register
+                  </a>
                   to view your photos.
                 </p>
               </mat-card-content>
+              <mat-card-actions>
+                <button mat-raised-button color="primary" routerLink="/login">
+                  <mat-icon>login</mat-icon> Login
+                </button>
+                <button mat-raised-button color="accent" routerLink="/register">
+                  <mat-icon>person_add</mat-icon> Register
+                </button>
+              </mat-card-actions>
             </mat-card>
           </div>
         </ng-template>

@@ -38,7 +38,7 @@ import { MatCardModule } from '@angular/material/card';
     AsyncPipe,
     NgIf,
     RouterModule,
-    MatCardModule
+    MatCardModule,
   ]
 })
 export class MainPageComponent {

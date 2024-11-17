@@ -8,5 +8,5 @@ export const routes: Routes = [
     { path: 'login', component: LoginComponent },
     { path: 'register', component: RegisterComponent },
     // Wildcard route for a 404 page, if desired
-    // { path: '**', redirectTo: '' },
+    { path: '**', redirectTo: '' },
   ];

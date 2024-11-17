@@ -1,20 +1,40 @@
 <div class="auth-container">
-    <h2>Login</h2>
-    <form (submit)="onSubmit()" #loginForm="ngForm">
-      <mat-form-field appearance="fill">
-        <mat-label>Username</mat-label>
-        <input matInput required name="username" [(ngModel)]="username" />
-      </mat-form-field>
-      <mat-form-field appearance="fill">
-        <mat-label>Password</mat-label>
-        <input matInput required name="password" [(ngModel)]="password" type="password" />
-      </mat-form-field>
-      
-      <button mat-raised-button color="primary" type="submit">Login</button>
-      <p *ngIf="errorMessage" class="error-message">{{ errorMessage }}</p>
-    </form>
-    <p>
-      Don't have an account?
-      <a routerLink="/register">Register here</a>
-    </p>
+  <h2>Login</h2>
+  <form (submit)="onSubmit()" #loginForm="ngForm" class="login-form">
+    <mat-form-field appearance="fill" class="full-width">
+      <mat-label>Username</mat-label>
+      <input matInput required name="username" [(ngModel)]="username" />
+    </mat-form-field>
+
+    <mat-form-field appearance="fill" class="full-width password-field">
+      <mat-label>Password</mat-label>
+      <input
+        matInput
+        required
+        name="password"
+        [(ngModel)]="password"
+        [type]="showPassword ? 'text' : 'password'"
+      />
+      <button
+        mat-icon-button
+        matSuffix
+        type="button"
+        (click)="togglePasswordVisibility()"
+        [attr.aria-label]="'Toggle password visibility'"
+        [attr.aria-pressed]="showPassword"
+      >
+        <mat-icon>{{ showPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+      </button>
+    </mat-form-field>
+    
+    <button mat-raised-button color="primary" type="submit" class="login-button">
+      Login
+    </button>
+
+    <p *ngIf="errorMessage" class="error-message">{{ errorMessage }}</p>
+  </form>
+
+  <p class="register-text">
+    Don't have an account? <a routerLink="/register">Register here</a>
+  </p>
 </div>

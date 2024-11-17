@@ -1,38 +1,27 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { BehaviorSubject, Observable, tap } from 'rxjs';
 
-interface User {
-  username: string;
-  password: string;
-}
+import { API_ENDPOINTS } from '../shared/api-endpoints';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
-  private users: User[] = []; // In-memory user store
   private currentUserSubject: BehaviorSubject<string | null> = new BehaviorSubject<string | null>(null);
 
-  constructor() {}
+  constructor(private http: HttpClient) {}
 
-  register(username: string, password: string): boolean {
-    // Check if user already exists
-    const userExists = this.users.some((user) => user.username === username);
-    if (userExists) {
-      return false; // Registration failed
-    }
-    // Add new user
-    this.users.push({ username, password });
-    return true; // Registration successful
+  register(username: string, password: string): Observable<any> {
+    return this.http.post(API_ENDPOINTS.REGISTER, { username, password });
   }
 
-  login(username: string, password: string): boolean {
-    const user = this.users.find((user) => user.username === username && user.password === password);
-    if (user) {
-      this.currentUserSubject.next(username);
-      return true;
-    }
-    return false;
+  login(username: string, password: string): Observable<any> {
+    return this.http.post(API_ENDPOINTS.LOGIN, { username, password }).pipe(
+      tap(() => {
+        this.currentUserSubject.next(username);
+      })
+    );
   }
 
   logout(): void {

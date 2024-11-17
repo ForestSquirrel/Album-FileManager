@@ -6,7 +6,9 @@ import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatIconModule } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
+import { finalize } from 'rxjs';
 
 @Component({
   selector: 'app-login',
@@ -17,7 +19,8 @@ import { CommonModule } from '@angular/common';
     MatInputModule,
     CommonModule,
     MatButtonModule,
-    RouterModule
+    RouterModule,
+    MatIconModule
   ],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss'
@@ -30,12 +33,25 @@ export class LoginComponent {
 
   constructor(private authService: AuthService, private router: Router) {}
 
+  showPassword: boolean = false;
+
+  togglePasswordVisibility(): void {
+    this.showPassword = !this.showPassword;
+  }
+  isLoading = false;
+
   onSubmit(): void {
-    const success = this.authService.login(this.username, this.password);
-    if (success) {
-      this.router.navigate(['/']);
-    } else {
-      this.errorMessage = 'Invalid username or password';
-    }
+    this.isLoading = true;
+    this.authService
+      .login(this.username, this.password)
+      .pipe(finalize(() => (this.isLoading = false)))
+      .subscribe({
+        next: () => {
+          this.router.navigate(['/']);
+        },
+        error: (error) => {
+          this.errorMessage = error.error.message || 'An error occurred';
+        },
+      });
   }
 }
