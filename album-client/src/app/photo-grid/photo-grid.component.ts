@@ -6,6 +6,8 @@ import {
   SimpleChanges,
   ChangeDetectionStrategy,
   OnDestroy,
+  EventEmitter,
+  Output
 } from '@angular/core';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { MatGridListModule } from '@angular/material/grid-list';
@@ -18,13 +20,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { DragDropModule, CdkDragDrop } from '@angular/cdk/drag-drop';
 import { DragDropService } from '../services/drag-drop.service';
 import { Subscription } from 'rxjs';
-
-export interface Photo {
-  id: string;
-  title: string;
-  url: string;
-  folder: string;
-}
+import { Photo } from '../models/photo.model';
 
 @Component({
   selector: 'app-photo-grid',
@@ -45,6 +41,9 @@ export interface Photo {
 })
 export class PhotoGridComponent implements OnInit, OnChanges, OnDestroy {
   @Input() photos: Photo[] = [];
+  @Output() photoDeleted = new EventEmitter<Photo>();
+  @Output() photoRenamed = new EventEmitter<Photo>();
+  @Output() photoShared = new EventEmitter<Photo>();
 
   pageSizeOptions = [6, 8, 18, 24];
   pageSize = 6;
@@ -58,21 +57,15 @@ export class PhotoGridComponent implements OnInit, OnChanges, OnDestroy {
   folderDropListIds: string[] = [];
   private subscription!: Subscription;
 
-  constructor(
-    private breakpointObserver: BreakpointObserver,
-    private dragDropService: DragDropService
-  ) {}
+  constructor(private dragDropService: DragDropService) {}
 
   ngOnInit(): void {
     this.updatePagedPhotos();
     this.updateGridLayout();
 
-    // Subscribe to folder drop list IDs
-    this.subscription = this.dragDropService.folderDropListIds$.subscribe(
-      (ids) => {
-        this.folderDropListIds = ids;
-      }
-    );
+    this.subscription = this.dragDropService.folderDropListIds$.subscribe((ids) => {
+      this.folderDropListIds = ids;
+    });
   }
 
   ngOnDestroy(): void {
@@ -81,11 +74,23 @@ export class PhotoGridComponent implements OnInit, OnChanges, OnDestroy {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['photos']) {
-      // Reset to the first page when photos change
       this.pageIndex = 0;
       this.updatePagedPhotos();
     }
   }
+
+  editPhoto(photo: Photo): void {
+    this.photoRenamed.emit(photo);
+  }
+
+  sharePhoto(photo: Photo): void {
+    this.photoShared.emit(photo);
+  }
+
+  deletePhoto(photo: Photo): void {
+    this.photoDeleted.emit(photo);
+  }
+
 
   onPageChange(event: PageEvent): void {
     this.pageSize = event.pageSize;
@@ -111,24 +116,6 @@ export class PhotoGridComponent implements OnInit, OnChanges, OnDestroy {
     const config = layoutConfig[this.pageSize] || { cols: 3 };
 
     this.gridCols = config.cols;
-  }
-
-  editPhoto(photo: Photo): void {}
-  sharePhoto(photo: Photo): void {}
-
-  deletePhoto(photo: Photo): void {
-    const confirmDelete = confirm(
-      `Are you sure you want to delete "${photo.title}"?`
-    );
-    if (confirmDelete) {
-      // Proceed with deletion
-      const index = this.photos.findIndex((p) => p.id === photo.id);
-      if (index > -1) {
-        this.photos.splice(index, 1);
-        // Update pagedPhotos
-        this.updatePagedPhotos();
-      }
-    }
   }
 
   onPhotoDrop(event: CdkDragDrop<Photo[]>): void {

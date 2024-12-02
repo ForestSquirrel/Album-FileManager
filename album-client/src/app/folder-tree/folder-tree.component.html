@@ -1,27 +1,9 @@
 <mat-tree
-  #tree
   [dataSource]="dataSource"
-  [childrenAccessor]="childrenAccessor"
+  [treeControl]="treeControl"
   class="folder-tree"
 >
-  <!-- Leaf node template -->
-  <mat-tree-node *matTreeNodeDef="let node">
-    <div
-      class="mat-tree-node"
-      (click)="selectNode(node, $event)"
-      [class.selected]="node === selectedNode"
-      cdkDropList
-      [cdkDropListConnectedTo]="['photosDropList']"
-      [cdkDropListData]="node"
-      (cdkDropListDropped)="onDrop($event, node)"
-      [id]="getDropListId(node)"
-    >
-      <button mat-icon-button disabled></button>
-      {{ node.name }}
-    </div>
-  </mat-tree-node>
-
-  <!-- Expandable node template -->
+  <!-- Nested node template -->
   <mat-nested-tree-node *matTreeNodeDef="let node; when: hasChild">
     <div
       class="mat-tree-node"
@@ -39,26 +21,48 @@
         [attr.aria-label]="'Toggle ' + node.name"
         (click)="$event.stopPropagation()"
       >
-        <mat-icon class="mat-icon-rtl-mirror">
-          {{ tree.isExpanded(node) ? 'expand_more' : 'chevron_right' }}
+        <mat-icon>
+          {{ treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right' }}
         </mat-icon>
       </button>
       {{ node.name }}
     </div>
-    <div
-      [class.example-tree-invisible]="!tree.isExpanded(node)"
-      role="group"
-    >
+    <div [class.example-tree-invisible]="!treeControl.isExpanded(node)" role="group">
       <ng-container matTreeNodeOutlet></ng-container>
     </div>
-  </mat-nested-tree-node>  
+  </mat-nested-tree-node>
+
+  <!-- Leaf node template -->
+  <mat-tree-node *matTreeNodeDef="let node">
+    <div
+      class="mat-tree-node"
+      (click)="selectNode(node, $event)"
+      [class.selected]="node === selectedNode"
+      cdkDropList
+      [cdkDropListConnectedTo]="['photosDropList']"
+      [cdkDropListData]="node"
+      (cdkDropListDropped)="onDrop($event, node)"
+      [id]="getDropListId(node)"
+    >
+      <button mat-icon-button disabled></button>
+      {{ node.name }}
+    </div>
+  </mat-tree-node>
 </mat-tree>
 
 <div class="tree-buttons">
-    <button mat-raised-button color="primary" (click)="uploadPhoto()">
-      Upload Photo
-    </button>
+  <button mat-raised-button color="primary" style="width: 100%;" (click)="uploadPhoto()">
+    Upload Photo
+  </button>
+  <button mat-raised-button color="accent" style="width: 100%;" (click)="renameFolder()">
+    Rename Folder
+  </button>
+  <div class="folder-actions">
     <button mat-raised-button color="accent" (click)="createFolder()">
       Create Folder
     </button>
+    <button mat-mini-fab color="warn" (click)="deleteFolder()">
+      <mat-icon>delete</mat-icon>
+    </button>
+  </div>
 </div>

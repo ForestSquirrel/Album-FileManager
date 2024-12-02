@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { ChangeDetectionStrategy, ChangeDetectorRef} from '@angular/core';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { AsyncPipe } from '@angular/common';
@@ -7,15 +7,18 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
-import { MatMenuModule } from '@angular/material/menu'; // Import MatMenuModule
+import { MatMenuModule } from '@angular/material/menu';
 import { NgIf } from '@angular/common';
 import { Observable } from 'rxjs';
 import { map, shareReplay } from 'rxjs/operators';
 
 import { ThemeService } from '../services/theme.service';
 import { FolderTreeComponent } from '../folder-tree/folder-tree.component';
-import { PhotoGridComponent, Photo } from '../photo-grid/photo-grid.component';
+import { PhotoGridComponent} from '../photo-grid/photo-grid.component';
 import { AuthService } from '../services/auth.service';
+import { FolderService, FolderNode } from '../services/folder.service';
+import { PhotoService } from '../services/photo.service';
+import { Photo } from '../models/photo.model';
 
 import { RouterModule } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
@@ -41,62 +44,76 @@ import { MatCardModule } from '@angular/material/card';
     MatCardModule,
   ]
 })
-export class MainPageComponent {
-  private breakpointObserver = inject(BreakpointObserver);
+export class MainPageComponent implements OnInit {
+  isHandset$: Observable<boolean>;
+  isLoggedIn = false;
+  currentUser: string | null = null;
+  userId: string | null = null;
 
-  isHandset$: Observable<boolean> = this.breakpointObserver.observe(Breakpoints.Handset)
-    .pipe(
-      map(result => result.matches),
-      shareReplay()
-    );
-
-    photosToDisplay: Photo[] = [];
-    selectedFolderName: string = '';
-  
-    // Map of folder names to photos
-    private folderPhotos: { [folderName: string]: Photo[] } = {};
-
-    isLoggedIn = false;
-    currentUser: string | null = null;
+  folders: FolderNode[] = [];
+  photosToDisplay: Photo[] = [];
+  selectedFolder: FolderNode | null = null;
 
   constructor(
-      private themeService: ThemeService,
-      private cdr: ChangeDetectorRef,
-      private authService: AuthService
-    ) {
-    
-    // Simulate generating photos for each folder
-    const folderNames = [
-      'root-folder1',
-      'Subfolder 1',
-      'Subfolder 2',
-      'root-folder2',
-      'Subfolder 3',
-      'Subfolder 4',
-    ];
+    private breakpointObserver: BreakpointObserver,
+    private themeService: ThemeService,
+    private cdr: ChangeDetectorRef,
+    private authService: AuthService,
+    private folderService: FolderService,
+    private photoService: PhotoService
+  ) {
+    this.isHandset$ = this.breakpointObserver.observe(Breakpoints.Handset).pipe(
+      map((result) => result.matches),
+      shareReplay()
+    );
+  }
 
-    folderNames.forEach((folderName) => {
-      const photos: Photo[] = [];
-      for (let i = 1; i <= 30; i++) {
-        photos.push({
-          id: `${folderName}-${i}`, // Ensure unique IDs
-          title: `Photo ${i} in ${folderName}`,
-          url: `https://via.placeholder.com/150`,
-          folder: folderName,
-        });
-      }
-      this.folderPhotos[folderName] = photos;
-    });
+  ngOnInit(): void {
+    const storedTheme = this.themeService.getStoredTheme();
+    if (storedTheme) {
+      this.themeService.setTheme(storedTheme);
+    }
 
     this.authService.getCurrentUser().subscribe((username) => {
       this.isLoggedIn = !!username;
       this.currentUser = username;
     });
+
+    this.authService.getCurrentUserId().subscribe((userId) => {
+      this.userId = userId;
+      if (userId) {
+        this.loadFolders();
+      }
+    });
   }
-  ngOnInit(): void {
-    const storedTheme = this.themeService.getStoredTheme();
-    if (storedTheme) {
-      this.themeService.setTheme(storedTheme);
+
+  loadFolders(): void {
+    if (this.userId) {
+      this.folderService.getFolders(this.userId).subscribe((folders) => {
+        this.folders = folders;
+        this.cdr.markForCheck();
+      });
+    }
+  }
+
+  updatePhotos(folder: FolderNode): void {
+    this.selectedFolder = folder;
+    if (this.userId && folder.id) {
+      this.photoService.getPhotos(this.userId, folder.id).subscribe((photos) => {
+        this.photosToDisplay = photos;
+        this.cdr.markForCheck();
+      });
+    }
+  }
+
+  onPhotoMoved(event: { photo: Photo; targetFolderId: number }): void {
+    const { photo, targetFolderId } = event;
+    if (this.userId) {
+      this.photoService
+        .movePhoto(photo.id, targetFolderId, this.userId)
+        .subscribe(() => {
+          this.updatePhotos(this.selectedFolder!);
+        });
     }
   }
 
@@ -104,43 +121,44 @@ export class MainPageComponent {
     this.themeService.setTheme(theme);
   }
 
-  updatePhotos(folderName: string): void {
-    this.selectedFolderName = folderName;
-    // Retrieve the photos for the selected folder
-    this.photosToDisplay = this.folderPhotos[folderName] || [];
-  }
-
-  onPhotoMoved(event: { photo: Photo; targetFolder: string }): void {
-    const { photo, targetFolder } = event;
-
-    // Remove the photo from its current folder
-    const currentFolderPhotos = this.folderPhotos[photo.folder];
-    if (currentFolderPhotos) {
-      const index = currentFolderPhotos.findIndex((p) => p.id === photo.id);
-      if (index > -1) {
-        currentFolderPhotos.splice(index, 1);
-      }
-    }
-
-    // Update the photo's folder property
-    photo.folder = targetFolder;
-
-    // Add the photo to the target folder
-    if (!this.folderPhotos[targetFolder]) {
-      this.folderPhotos[targetFolder] = [];
-    }
-    this.folderPhotos[targetFolder].push(photo);
-
-    // If the current folder is selected, update the photosToDisplay
-    if (
-      this.selectedFolderName === photo.folder ||
-      this.selectedFolderName === targetFolder
-    ) {
-      this.updatePhotos(this.selectedFolderName);
-    }
-  }
-
   logout(): void {
     this.authService.logout();
+  }
+
+  handlePhotoDeleted(photo: Photo): void {
+    if (this.userId) {
+      this.photoService.deletePhoto(photo.id, this.userId).subscribe(() => {
+        this.photosToDisplay = this.photosToDisplay.filter((p) => p.id !== photo.id);
+        this.cdr.markForCheck();
+      });
+    }
+  }
+  
+  handlePhotoRenamed(photo: Photo): void {
+    if (this.userId) {
+      const newTitle = prompt('Enter new title:', photo.title);
+      if (newTitle && newTitle !== photo.title) {
+        this.photoService.renamePhoto(photo.id, newTitle, this.userId).subscribe((updatedPhoto) => {
+          const index = this.photosToDisplay.findIndex((p) => p.id === updatedPhoto.id);
+          if (index !== -1) {
+            this.photosToDisplay[index] = updatedPhoto;
+            this.cdr.markForCheck();
+          }
+        });
+      }
+    }
+  }
+  
+  handlePhotoShared(photo: Photo): void {
+    const staticUrl = `https://forestsquirrel.me:3001/static/${photo.url}`;
+    navigator.clipboard.writeText(staticUrl).then(() => {
+      alert('Photo link copied to clipboard!');
+    });
+  }
+
+  refreshPhotos(): void {
+    if (this.selectedFolder) {
+      this.updatePhotos(this.selectedFolder);
+    }
   }
 }

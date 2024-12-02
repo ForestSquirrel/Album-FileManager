@@ -7,7 +7,11 @@ var fs = require('fs'); // Import the fs module
 var https = require('https'); // Import the https module
 
 var { initDatabase } = require('./db-middleware/pgInstance');
+
 var userRoutes = require('./routes/users'); // Import user routes
+var folderRoutes = require('./routes/folders');
+var photoRoutes = require('./routes/photos');
+
 var app = express();
 
 // Middleware setup
@@ -23,6 +27,10 @@ app.use(function (req, res, next) {
 
 // Routes
 app.use('/api/v1/users', userRoutes); // Use user routes
+app.use('/api/v1/folders', folderRoutes); // Existing folder routes
+app.use('/api/v1/photos', photoRoutes); // New photo routes
+
+app.use('/static', express.static(path.join(__dirname, 'uploads')));
 
 // Read SSL certificate and key
 const sslOptions = {

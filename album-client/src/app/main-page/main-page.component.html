@@ -7,10 +7,12 @@
     [mode]="(isHandset$ | async) ? 'over' : 'side'"
     [opened]="(isHandset$ | async) === false"
   >
-  <mat-toolbar>Folders</mat-toolbar>
+    <mat-toolbar>Folders</mat-toolbar>
     <app-folder-tree
-      (folderSelected)="updatePhotos($event.name)"
+      [dataSource]="folders"
+      (folderSelected)="updatePhotos($event)"
       (photoMoved)="onPhotoMoved($event)"
+      (photoUploaded)="refreshPhotos()"
     ></app-folder-tree>
   </mat-sidenav>
 
@@ -67,7 +69,12 @@
       <!-- Main content area -->
       <div class="main-content">
         <ng-container *ngIf="isLoggedIn; else loginPrompt">
-          <app-photo-grid [photos]="photosToDisplay"></app-photo-grid>
+          <app-photo-grid
+            [photos]="photosToDisplay"
+            (photoDeleted)="handlePhotoDeleted($event)"
+            (photoRenamed)="handlePhotoRenamed($event)"
+            (photoShared)="handlePhotoShared($event)"
+          ></app-photo-grid>
         </ng-container>
         <ng-template #loginPrompt>
           <div class="login-container">

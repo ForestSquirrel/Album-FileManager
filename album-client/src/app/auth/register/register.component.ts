@@ -1,3 +1,5 @@
+// src/app/register/register.component.ts
+
 import { Component } from '@angular/core';
 import { AuthService } from '../../services/auth.service';
 import { Router, RouterModule } from '@angular/router';
@@ -8,7 +10,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 
-import { finalize } from 'rxjs';
+import { finalize } from 'rxjs/operators';
 import { MatIconModule } from '@angular/material/icon';
 
 @Component({
@@ -21,21 +23,22 @@ import { MatIconModule } from '@angular/material/icon';
     CommonModule,
     MatButtonModule,
     RouterModule,
-    MatIconModule
+    MatIconModule,
   ],
   templateUrl: './register.component.html',
-  styleUrls:  ['./register.component.scss'],
+  styleUrls: ['./register.component.scss'],
 })
 export class RegisterComponent {
   username = '';
   password = '';
   repeatPassword = '';
   errorMessage = '';
-
-  constructor(private authService: AuthService, private router: Router) {}
+  isLoading = false;
 
   showPassword: boolean = false;
   showRepeatPassword: boolean = false;
+
+  constructor(private authService: AuthService, private router: Router) {}
 
   togglePasswordVisibility(field: string): void {
     if (field === 'password') {
@@ -45,23 +48,21 @@ export class RegisterComponent {
     }
   }
 
-  isLoading = false;
-
   onSubmit(): void {
     if (this.password !== this.repeatPassword) {
       this.errorMessage = 'Passwords do not match';
       return;
     }
+
     this.isLoading = true;
+
     this.authService
       .register(this.username, this.password)
       .pipe(finalize(() => (this.isLoading = false)))
       .subscribe({
         next: () => {
-          // Automatically log in after registration
-          this.authService.login(this.username, this.password).subscribe(() => {
-            this.router.navigate(['/']);
-          });
+          // User is already logged in after registration
+          this.router.navigate(['/main']);
         },
         error: (error) => {
           this.errorMessage = error.error.message || 'An error occurred';
