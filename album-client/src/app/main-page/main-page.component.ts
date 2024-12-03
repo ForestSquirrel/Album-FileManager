@@ -150,7 +150,7 @@ export class MainPageComponent implements OnInit {
   }
   
   handlePhotoShared(photo: Photo): void {
-    const staticUrl = `https://forestsquirrel.me:3001/static/${photo.url}`;
+    const staticUrl = `${photo.url}`;
     navigator.clipboard.writeText(staticUrl).then(() => {
       alert('Photo link copied to clipboard!');
     });
