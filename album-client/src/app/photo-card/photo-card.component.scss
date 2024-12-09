@@ -1,0 +1,35 @@
+mat-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 16px;
+  }
+  
+  mat-card-header {
+    position: relative;
+    width: 100%;
+    text-align: center;
+  
+    .close-button {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+    }
+  }
+  
+  mat-card-actions {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+    margin-top: 16px;
+  }
+  
+  img {
+    max-width: 100%;
+    border-radius: 8px;
+  }
+  
+  /* Spacer styling */
+ .spacer {
+    height: 16px; /* Adjust the height for the desired spacing */
+  }

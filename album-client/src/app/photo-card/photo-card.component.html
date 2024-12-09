@@ -1,0 +1,18 @@
+<mat-card>
+    <mat-card-header>
+      <mat-card-title>{{ data.photo.title }}</mat-card-title>
+
+      <button mat-icon-button (click)="closeDialog()" class="close-button">
+        <mat-icon>close</mat-icon>
+      </button>
+    </mat-card-header>
+    <div class="spacer"></div>
+    <img mat-card-image [src]="data.photo.url" [alt]="data.photo.title" />
+    <mat-card-actions class="action-buttons">
+      <button mat-raised-button color="primary" (click)="editPhoto()">Edit</button>
+      <button mat-raised-button color="accent" (click)="sharePhoto()">Share</button>
+      <button mat-raised-button color="warn" (click)="deletePhoto()">Delete</button>
+      <button mat-raised-button (click)="downloadPhoto()">Download</button>
+    </mat-card-actions>
+  </mat-card>
+  

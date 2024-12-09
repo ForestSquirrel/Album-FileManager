@@ -38,6 +38,14 @@
             </button>
             <!-- Menu -->
             <mat-menu #menu="matMenu">
+              <button mat-menu-item (click)="openCard(photo)">
+              <mat-icon> fullscreen </mat-icon>
+              <span> Open Card </span>
+              </button>
+              <button mat-menu-item (click)="downloadPhoto(photo)">
+                <mat-icon>download</mat-icon>
+                <span>Download</span>
+              </button>
               <button mat-menu-item (click)="editPhoto(photo)">
                 <mat-icon>edit</mat-icon>
                 <span>Edit</span>

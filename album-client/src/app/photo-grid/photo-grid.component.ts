@@ -17,10 +17,12 @@ import { MatButtonModule } from '@angular/material/button';
 import { CommonModule } from '@angular/common';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatIconModule } from '@angular/material/icon';
+import { MatDialog } from '@angular/material/dialog';
 import { DragDropModule, CdkDragDrop } from '@angular/cdk/drag-drop';
 import { DragDropService } from '../services/drag-drop.service';
 import { Subscription } from 'rxjs';
 import { Photo } from '../models/photo.model';
+import { PhotoCardComponent } from '../photo-card/photo-card.component';
 
 @Component({
   selector: 'app-photo-grid',
@@ -57,7 +59,10 @@ export class PhotoGridComponent implements OnInit, OnChanges, OnDestroy {
   folderDropListIds: string[] = [];
   private subscription!: Subscription;
 
-  constructor(private dragDropService: DragDropService) {}
+  constructor(
+    private dragDropService: DragDropService,
+    private dialog: MatDialog
+  ) {}
 
   ngOnInit(): void {
     this.updatePagedPhotos();
@@ -121,4 +126,45 @@ export class PhotoGridComponent implements OnInit, OnChanges, OnDestroy {
   onPhotoDrop(event: CdkDragDrop<Photo[]>): void {
     // Optional: Handle drop events within the photo grid (e.g., rearranging photos)
   }
+
+  openCard(photo: Photo): void {
+    const dialogRef = this.dialog.open(PhotoCardComponent, {
+      width: '400px',
+      data: { photo },
+    });
+
+    dialogRef.componentInstance.photoRenamed.subscribe((updatedPhoto: Photo) =>
+      this.photoRenamed.emit(updatedPhoto)
+    );
+    dialogRef.componentInstance.photoShared.subscribe((sharedPhoto: Photo) =>
+      this.photoShared.emit(sharedPhoto)
+    );
+    dialogRef.componentInstance.photoDeleted.subscribe((deletedPhoto: Photo) =>
+      this.photoDeleted.emit(deletedPhoto)
+    );
+  }
+
+  downloadPhoto(photo: Photo): void {
+    // Fetch the file to ensure it's blob data
+    fetch(photo.url)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.blob();
+      })
+      .then((blob) => {
+        const blobURL = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = blobURL;
+        link.download = photo.title || 'photo';
+        // Programmatically click the link to trigger the "Save As" dialog
+        link.click();
+        URL.revokeObjectURL(blobURL); // Clean up the object URL
+      })
+      .catch((error) => {
+        console.error('Error downloading photo:', error);
+      });
+  }
+  
 }
