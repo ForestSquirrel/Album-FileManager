@@ -12,17 +12,24 @@ import { catchError, map } from 'rxjs/operators';
 export class PhotoService {
   constructor(private http: HttpClient) {}
 
-  /**
-   * Retrieves photos for a user, optionally filtered by folder.
+   /**
+   * Retrieves photos for a user, optionally filtered by folder and/or title.
    * @param userId The ID of the user.
    * @param folderId (Optional) The ID of the folder to filter photos by.
+   * @param title (Optional) The title substring to search for.
    * @returns An Observable of an array of Photo objects.
    */
-  getPhotos(userId: string, folderId?: number): Observable<Photo[]> {
+   getPhotos(userId: string, folderId?: number, title?: string): Observable<Photo[]> {
     let params = new HttpParams().set('userId', userId);
+
     if (folderId) {
       params = params.set('folderId', folderId.toString());
     }
+
+    if (title) {
+      params = params.set('title', title);
+    }
+
     return this.http.get<{ photos: Photo[] }>(API_ENDPOINTS.GET_PHOTOS, { params }).pipe(
       map(response => response.photos),
       catchError(error => {

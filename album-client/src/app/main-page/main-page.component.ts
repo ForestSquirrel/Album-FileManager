@@ -22,6 +22,9 @@ import { Photo } from '../models/photo.model';
 
 import { RouterModule } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
+import { FormsModule } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import {MatInputModule} from '@angular/material/input';
 
 @Component({
   selector: 'app-main-page',
@@ -37,11 +40,14 @@ import { MatCardModule } from '@angular/material/card';
     MatSidenavModule,
     MatListModule,
     MatIconModule,
-    MatMenuModule, // Add MatMenuModule here
+    MatMenuModule,
     AsyncPipe,
     NgIf,
     RouterModule,
     MatCardModule,
+    FormsModule,
+    MatFormFieldModule,
+    MatInputModule
   ]
 })
 export class MainPageComponent implements OnInit {
@@ -50,9 +56,10 @@ export class MainPageComponent implements OnInit {
   currentUser: string | null = null;
   userId: string | null = null;
 
-  folders: FolderNode[] = [];
-  photosToDisplay: Photo[] = [];
+  folders: FolderNode[] = []; // input to folder tree
+  photosToDisplay: Photo[] = []; // input to frid
   selectedFolder: FolderNode | null = null;
+  searchQuery: string = ''; // Track search input
 
   constructor(
     private breakpointObserver: BreakpointObserver,
@@ -96,14 +103,25 @@ export class MainPageComponent implements OnInit {
     }
   }
 
-  updatePhotos(folder: FolderNode): void {
-    this.selectedFolder = folder;
-    if (this.userId && folder.id) {
-      this.photoService.getPhotos(this.userId, folder.id).subscribe((photos) => {
-        this.photosToDisplay = photos;
-        this.cdr.markForCheck();
-      });
+  updatePhotos(folder?: FolderNode): void {
+    this.selectedFolder = folder || null;
+
+    if (this.userId) {
+      this.photoService
+        .getPhotos(
+          this.userId,
+          this.selectedFolder ? this.selectedFolder.id : undefined,
+          this.searchQuery ? this.searchQuery : undefined// Pass search query to the service
+        )
+        .subscribe((photos) => {
+          this.photosToDisplay = photos;
+          this.cdr.markForCheck();
+        });
     }
+  }
+
+  onSearch(): void {
+    this.updatePhotos();
   }
 
   onPhotoMoved(event: { photo: Photo; targetFolderId: number }): void {

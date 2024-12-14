@@ -31,6 +31,21 @@
         </button>
         <span>Photo Gallery</span>
         <span class="spacer"></span>
+        <div class="search-bar-toolbar">
+          <mat-form-field class="search-bar" appearance="outline">
+            <mat-label>Search Photos</mat-label>
+            <input
+              matInput
+              [(ngModel)]="searchQuery"
+              placeholder="Enter title..."
+              (keyup.enter)="onSearch()"
+            />
+            <button matSuffix mat-icon-button aria-label="Search" (click)="onSearch()">
+              <mat-icon>search</mat-icon>
+            </button>
+          </mat-form-field>
+      </div>
+      <span class="spacer"></span>
         <!-- Theme Switcher Icon -->
         <button mat-icon-button [matMenuTriggerFor]="themeMenu">
           <mat-icon>palette</mat-icon>

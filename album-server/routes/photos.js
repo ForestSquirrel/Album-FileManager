@@ -8,6 +8,7 @@ const {Folder, Photo} = require('../db-middleware/models');
 
 const path = require('path');
 const fs = require('fs');
+const { Op } = require('sequelize');
 
 // Upload a new photo
 router.post('/', upload.single('photo'), async (req, res) => {
@@ -51,27 +52,38 @@ router.post('/', upload.single('photo'), async (req, res) => {
 });
 
 // Get all photos for a user (optionally filtered by folder)
+// Get all photos for a user (optionally filtered by folder and title)
 router.get('/', async (req, res) => {
-    const { userId, folderId } = req.query;
-  
-    try {
+  const { userId, folderId, title } = req.query;
+
+  try {
       if (!userId) {
-        return res.status(400).json({ message: 'User ID is required' });
+          return res.status(400).json({ message: 'User ID is required' });
       }
-  
+
+      // Initialize whereClause with user_id
       const whereClause = { user_id: userId };
+
+      // Add folder_id filter if provided
       if (folderId) {
-        whereClause.folder_id = folderId;
+          whereClause.folder_id = folderId;
       }
-  
+
+      // Add title filter for case-insensitive substring search
+      if (title) {
+          whereClause.title = { [Op.iLike]: `%${title}%` }; // Op.iLike performs case-insensitive search
+      }
+
+      // Fetch photos with the constructed whereClause
       const photos = await Photo.findAll({ where: whereClause });
-  
+
       res.status(200).json({ photos });
-    } catch (error) {
+  } catch (error) {
       console.error('Error fetching photos:', error);
       res.status(500).json({ message: 'Internal server error' });
-    }
+  }
 });
+
 
 // Rename a photo
 router.patch('/:id', async (req, res) => {

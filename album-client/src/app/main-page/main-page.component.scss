@@ -12,10 +12,6 @@
   z-index: 1;
 }
 
-.spacer {
-  flex: 1 1 auto;
-}
-
 .sidenav-container {
   height: 100vh; /* Make the container fill the viewport height */
 }
@@ -98,4 +94,34 @@ mat-card-actions {
       margin-right: 5px; // Space between icon and text
     }
   }
+}
+
+/* Spacer to push content to the edges */
+.spacer {
+  flex: 1 1 auto;
+}
+
+/* Search bar inside the toolbar */
+.search-bar-toolbar {
+  flex: 1; /* Take up available space */
+  height: 90%;
+}
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.search-bar button:hover {
+  background-color: rgba(0, 123, 255, 0.1); /* Subtle blue hover effect */
+}
+
+.search-bar input {
+  color: white; /* Makes text white */
+  border: none; /* Optional: Remove border for cleaner look */
+}
+
+.search-bar input::placeholder {
+  color: rgba(255, 255, 255, 0.7); /* Makes placeholder text white with some transparency */
 }

@@ -76,8 +76,16 @@ export class FolderTreeComponent implements OnInit, OnChanges {
 
   selectNode(node: FolderNode, event: Event): void {
     event.stopPropagation();
-    this.selectedNode = node;
-    this.folderSelected.emit(node);
+  
+    if (this.selectedNode === node) {
+      // If the node is already selected, deselect it
+      this.selectedNode = null;
+      this.folderSelected.emit(undefined);
+    } else {
+      // Otherwise, select the new node
+      this.selectedNode = node;
+      this.folderSelected.emit(node);
+    }
   }
 
   uploadPhoto(): void {
